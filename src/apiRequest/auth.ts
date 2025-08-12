@@ -3,7 +3,7 @@ import { LoginBodyType, LoginResType, LogoutBodyType } from "../schemaValidation
 
 // đây là api của server backend
 const authApiRequest = {
-  // này do kiểu BE trả về như vật
+  // này do kiểu BE trả về như vậy
   sLogin: (body: LoginBodyType) => http.post<LoginResType>("/auth/login", body), // này được gọi từ server
   // Nếu client truyền rỗng thì gọi đến next serve
   login: (body: LoginBodyType) =>
