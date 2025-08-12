@@ -1,5 +1,5 @@
 import http from "../lib/http";
-import { LoginBodyType, LoginResType } from "../schemaValidations/auth.schema";
+import { LoginBodyType, LoginResType, LogoutBodyType } from "../schemaValidations/auth.schema";
 
 // đây là api của server backend
 const authApiRequest = {
@@ -8,6 +8,29 @@ const authApiRequest = {
   // Nếu client truyền rỗng thì gọi đến next serve
   login: (body: LoginBodyType) =>
     http.post<LoginResType>("/api/auth/login", body, {
+      baseUrl: "",
+    }),
+
+  slogout: (body: LogoutBodyType & { accessToken: string }) =>
+    http.post(
+      "/auth/logout",
+      {
+        refreshToken: body.refreshToken,
+      },
+      {
+        headers: {
+          Authorization: `Bear ${body.accessToken}`,
+        },
+      }
+    ),
+
+  // slogout: (body: LogoutBodyType) =>
+  //   http.post("/auth/logout", {
+  //     refreshToken: body.refreshToken,
+  //   }),
+
+  logout: () =>
+    http.post<LoginResType>("/api/auth/logout", null, {
       baseUrl: "",
     }),
 };

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const decodeAcessToken = JSON.parse(atob(accessToken.split(".")[1])) as { exp: number };
     const decodeRefreshToken = JSON.parse(atob(refreshToken.split(".")[1])) as { exp: number };
 
-    (await cookieStore).set("acccessToken", accessToken, {
+    (await cookieStore).set("accessToken", accessToken, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       expires: decodeAcessToken.exp * 1000, // thời gian hết hạn, chỉ cần nhân 1000 là ra
     });
 
-    (await cookieStore).set("decodeRefreshToken", refreshToken, {
+    (await cookieStore).set("refreshToken", refreshToken, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",

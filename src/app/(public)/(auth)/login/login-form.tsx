@@ -8,11 +8,14 @@ import { handleErrorApi } from "@/lib/utils";
 import { useLoginAuth } from "@/queries/useAuth";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function LoginForm() {
   const loginMutation = useLoginAuth();
+  const router = useRouter();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -25,11 +28,8 @@ export default function LoginForm() {
     if (loginMutation.isPending) return;
 
     try {
-      console.log("data", data);
-
       const result = await loginMutation.mutateAsync(data);
-      console.log("result", result);
-
+      router.push("/manage/dashboard");
       toast.success(result.payload.message);
     } catch (error) {
       handleErrorApi({

@@ -1,30 +1,44 @@
 "use client";
 
+import { getAccessTokenFromLocalStorage } from "@/lib/utils";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const menuItems = [
   {
     title: "Món ăn",
-    href: "/menu",
+    href: "/menu", // authRequired = undefined là nghĩa đăng nhập ha chưa đều sẽ hiển thị
   },
   {
     title: "Đơn hàng",
     href: "/orders",
+    authRequired: true,
   },
   {
     title: "Đăng nhập",
     href: "/login",
-    authRequired: false,
+    authRequired: false, // khi false nghĩa là chưa đăng nhập sẽ hiển thị
   },
   {
     title: "Quản lý",
     href: "/manage/dashboard",
-    authRequired: true,
+    authRequired: true, // đăng nhập rồi mới hiển thị
   },
 ];
 
+// Server trả về mons ăn, đăng nhập. Do server không biết trạng thái của client
+//CLient: Đầu tiên hiển thị món ăn, đăng nhập
+// nhưng ngay sau đó client hiện ra món ăn, đơn hàng , quản lý do là đã check được trạng thái đăng nhập
+// lúc này server vẫn chưa biết do là trạng thái đăng nhập của user do chưa check cookie
 export default function NavItems({ className }: { className?: string }) {
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsAuth(Boolean(getAccessTokenFromLocalStorage()));
+  }, []);
+
   return menuItems.map((item) => {
+    if ((item.authRequired === false && isAuth) || (item.authRequired === true && !isAuth)) return null;
     return (
       <Link href={item.href} key={item.href} className={className}>
         {item.title}
