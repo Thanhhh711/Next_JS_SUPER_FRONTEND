@@ -8,14 +8,23 @@ const unAuthPaths = ["/login"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isAuth = Boolean(request.cookies.get("accessToken")?.value);
+  const accessToken = Boolean(request.cookies.get("accessToken")?.value);
+  const refreshToken = Boolean(request.cookies.get("refreshToken")?.value);
 
-  if (privatePaths.some((path) => pathname.startsWith(path)) && !isAuth) {
+  // chưa đăng nhập thì không cho vào privatePath
+  if (privatePaths.some((path) => pathname.startsWith(path)) && !refreshToken) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Đăng nhập rồi không cho login nữa
-  if (unAuthPaths.some((path) => pathname.startsWith(path)) && isAuth) {
+  // đăng nhập rồi, mà access hết hạn
+  if (privatePaths.some((path) => pathname.startsWith(path)) && !accessToken && refreshToken) {
+    const url = new URL("/logout", request.url);
+    url.searchParams.set("refreshToken", request.cookies.get("refreshToken")?.value ?? "");
+    return NextResponse.redirect(url);
+  }
+
+  // đăng nhập rồi thì không cho login nữa
+  if (unAuthPaths.some((path) => pathname.startsWith(path)) && refreshToken) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
