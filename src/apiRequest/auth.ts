@@ -10,11 +10,9 @@ import {
 // đây là api của server backend
 const authApiRequest = {
   refreshTokenRequest: null as Promise<{
-    status: number,
-    payload:RefreshTokenResType
-  }> | null
-
-
+    status: number;
+    payload: RefreshTokenResType;
+  }> | null,
 
   // này do kiểu BE trả về như vậy
   sLogin: (body: LoginBodyType) => http.post<LoginResType>("/auth/login", body), // này được gọi từ server
@@ -54,19 +52,16 @@ const authApiRequest = {
 
   // client
   async refreshToken() {
-    
     // tránh gọi lại 2 lần
-    if (this.refreshTokenRequest) { 
-        return this.refreshTokenRequest
+    if (this.refreshTokenRequest) {
+      return this.refreshTokenRequest;
     }
-    
-    
-    this.refreshTokenRequest = http.post<RefreshTokenResType>("/api/auth/refresh-token", null, { baseUrl: "" })
-    
 
-    const result = await this.refreshTokenRequest 
+    this.refreshTokenRequest = http.post<RefreshTokenResType>("/api/auth/refresh-token", null, { baseUrl: "" });
+
+    const result = await this.refreshTokenRequest;
     this.refreshTokenRequest = null;
-      return result
+    return result;
   },
 };
 

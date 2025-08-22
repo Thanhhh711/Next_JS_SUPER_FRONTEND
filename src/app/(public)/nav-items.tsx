@@ -1,8 +1,7 @@
 "use client";
 
-import { getAccessTokenFromLocalStorage } from "@/lib/utils";
+import { useAppContext } from "@/components/app-provider";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const menuItems = [
   {
@@ -31,11 +30,7 @@ const menuItems = [
 // nhưng ngay sau đó client hiện ra món ăn, đơn hàng , quản lý do là đã check được trạng thái đăng nhập
 // lúc này server vẫn chưa biết do là trạng thái đăng nhập của user do chưa check cookie
 export default function NavItems({ className }: { className?: string }) {
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setIsAuth(Boolean(getAccessTokenFromLocalStorage()));
-  }, []);
+  const { isAuth } = useAppContext();
 
   return menuItems.map((item) => {
     if ((item.authRequired === false && isAuth) || (item.authRequired === true && !isAuth)) return null;

@@ -1,4 +1,5 @@
 "use client";
+import { useAppContext } from "@/components/app-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
@@ -8,13 +9,21 @@ import { handleErrorApi } from "@/lib/utils";
 import { useLoginAuth } from "@/queries/useAuth";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function LoginForm() {
   const loginMutation = useLoginAuth();
+
+  const searchParams = useSearchParams();
+
+  const clearTokens = searchParams.get("clearTokens");
+
+  const { setIsAuth } = useAppContext();
+
   const router = useRouter();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -24,12 +33,19 @@ export default function LoginForm() {
     },
   });
 
+  useEffect(() => {
+    if (clearTokens) {
+      setIsAuth(false);
+    }
+  }, [clearTokens, setIsAuth]);
+
   const onSubmit = async (data: LoginBodyType) => {
     if (loginMutation.isPending) return;
 
     try {
       const result = await loginMutation.mutateAsync(data);
       router.push("/manage/dashboard");
+      setIsAuth(true);
       toast.success(result.payload.message);
     } catch (error) {
       handleErrorApi({

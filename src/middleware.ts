@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const privatePaths = ["/manage"];
 const unAuthPaths = ["/login"];
@@ -8,24 +8,30 @@ const unAuthPaths = ["/login"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const accessToken = Boolean(request.cookies.get("accessToken")?.value);
-  const refreshToken = Boolean(request.cookies.get("refreshToken")?.value);
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
   // chưa đăng nhập thì không cho vào privatePath
   if (privatePaths.some((path) => pathname.startsWith(path)) && !refreshToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+    const url = new URL("/login", request.url);
 
-  // đăng nhập rồi, mà access hết hạn
-  if (privatePaths.some((path) => pathname.startsWith(path)) && !accessToken && refreshToken) {
-    const url = new URL("/logout", request.url);
-    url.searchParams.set("refreshToken", request.cookies.get("refreshToken")?.value ?? "");
-    return NextResponse.redirect(url);
+    url.searchParams.set("clearTokens", "true");
+
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // đăng nhập rồi thì không cho login nữa
   if (unAuthPaths.some((path) => pathname.startsWith(path)) && refreshToken) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // đăng nhập rồi, mà access hết hạn
+  if (privatePaths.some((path) => pathname.startsWith(path)) && !accessToken && refreshToken) {
+    const url = new URL("/refresh-token", request.url);
+    url.searchParams.set("refreshToken", refreshToken);
+    url.searchParams.set("redirect", pathname);
+
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
