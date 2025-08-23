@@ -5,9 +5,9 @@ import { useAppContext } from "@/components/app-provider";
 import { getAccessTokenFromLocalStorage, getRefreshTokenFromLocalStorage } from "@/lib/utils";
 import { useLogoutAuth } from "@/queries/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useRef } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 
-export default function LogoutPage() {
+function Logout() {
   const { mutateAsync } = useLogoutAuth();
   const ref = useRef<any>(null);
   const router = useRouter();
@@ -38,7 +38,15 @@ export default function LogoutPage() {
       // veef trang chu
       router.push("/");
     }
-  }, [mutateAsync, router, refreshTokenFormUrl]);
+  }, [mutateAsync, router, refreshTokenFormUrl, accessTokenFormUrl, setIsAuth]);
 
   return <div>Loading ....</div>;
+}
+
+export default function LogoutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Logout />
+    </Suspense>
+  );
 }

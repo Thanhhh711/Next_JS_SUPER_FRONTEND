@@ -3,9 +3,9 @@
 
 import { checkAndRefreshToken, getRefreshTokenFromLocalStorage } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function RefreshTokenPage() {
+function RefreshToken() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -27,4 +27,13 @@ export default function RefreshTokenPage() {
   }, [redirectPathname, router, refreshTokenFormUrl]);
 
   return <div>Refresh token ....</div>;
+}
+
+export default function RefreshTokenPage() {
+  return (
+    // Refresh chưa load thì sẽ load cái fallback
+    <Suspense fallback={<div>Loading...</div>}>
+      <RefreshToken />
+    </Suspense>
+  );
 }

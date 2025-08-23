@@ -5,7 +5,7 @@ import { HttpError } from "../../../../lib/http";
 // loggour là luôn luôn thành côn công
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function POST(request: RequestCache) {
+export async function POST(request: Request) {
   const cookieStore = cookies(); // Lâyus ra được access và refresh
   const accessToken = (await cookieStore).get("accessToken")?.value;
   const refreshToken = (await cookieStore).get("refreshToken")?.value;
