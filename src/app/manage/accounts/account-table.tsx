@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSearchParams } from "next/navigation";
 import AutoPagination from "@/components/auto-pagination";
+import { useGetAccountList } from "@/queries/useAccount";
 
 type AccountItem = AccountListResType["data"][0];
 
@@ -167,8 +168,10 @@ export default function AccountTable() {
   // const params = Object.fromEntries(searchParam.entries())
   const [employeeIdEdit, setEmployeeIdEdit] = useState<number | undefined>();
   const [employeeDelete, setEmployeeDelete] = useState<AccountItem | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any[] = [];
+
+  const accountListQuery = useGetAccountList();
+  const data = accountListQuery.data?.payload.data ?? [];
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
