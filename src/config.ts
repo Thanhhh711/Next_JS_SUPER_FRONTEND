@@ -20,3 +20,9 @@ if (!configProject.success) {
 const evnConfig = configProject.data;
 
 export default evnConfig;
+
+export type Locale = (typeof locales)[number];
+
+export const locales = ["en", "vi"] as const;
+
+export const defaultLocale: Locale = "vi";
