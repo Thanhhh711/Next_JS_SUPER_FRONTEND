@@ -1,27 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useAppContext } from "@/components/app-provider";
+import { Role } from "@/constants/type";
+import { handleErrorApi } from "@/lib/utils";
+import { useGuestLogoutMutation } from "@/queries/useGuest";
+import { RoleType } from "@/types/jwt.types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const menuItems = [
+const menuItems: {
+  title: string;
+  href: string;
+  role?: RoleType[];
+  hideWhenLogin?: boolean;
+}[] = [
   {
-    title: "Món ăn",
-    href: "/menu", // authRequired = undefined là nghĩa đăng nhập ha chưa đều sẽ hiển thị
+    title: "home",
+    href: "/",
   },
   {
-    title: "Đơn hàng",
-    href: "/orders",
-    authRequired: true,
+    title: "menu",
+    href: "/guest/menu",
+    role: [Role.Guest],
   },
   {
-    title: "Đăng nhập",
+    title: "orders",
+    href: "/guest/orders",
+    role: [Role.Guest],
+  },
+  {
+    title: "login",
     href: "/login",
-    authRequired: false, // khi false nghĩa là chưa đăng nhập sẽ hiển thị
+    hideWhenLogin: true,
   },
   {
-    title: "Quản lý",
+    title: "manage",
     href: "/manage/dashboard",
-    authRequired: true, // đăng nhập rồi mới hiển thị
+    role: [Role.Owner, Role.Employee],
   },
 ];
 
@@ -30,14 +46,45 @@ const menuItems = [
 // nhưng ngay sau đó client hiện ra món ăn, đơn hàng , quản lý do là đã check được trạng thái đăng nhập
 // lúc này server vẫn chưa biết do là trạng thái đăng nhập của user do chưa check cookie
 export default function NavItems({ className }: { className?: string }) {
-  const { isAuth } = useAppContext();
+  const { role } = useAppContext();
+  const logoutMutation = useGuestLogoutMutation();
+  const router = useRouter();
+  const logout = async () => {
+    if (logoutMutation.isPending) return;
+    try {
+      await logoutMutation.mutateAsync();
 
-  return menuItems.map((item) => {
-    if ((item.authRequired === false && isAuth) || (item.authRequired === true && !isAuth)) return null;
-    return (
-      <Link href={item.href} key={item.href} className={className}>
-        {item.title}
-      </Link>
-    );
-  });
+      router.push("/");
+    } catch (error: any) {
+      handleErrorApi({
+        error,
+      });
+    }
+  };
+
+  return (
+    <>
+      {menuItems.map((item) => {
+        // trường hợp đăng nhập chỉ hiển thị menu đăng nhập
+        const isAuth = item.role && role && item.role.includes(role);
+        // Trường hợp menu item hiển thị dù đã đăng nhập hay chưa
+        const canShow = (item.role === undefined && !item.hideWhenLogin) || (!role && item.hideWhenLogin);
+
+        if (isAuth || canShow) {
+          return (
+            <Link href={item.href} key={item.href} className={className}>
+              {item.title}
+            </Link>
+          );
+        }
+        return null;
+      })}
+
+      {role && (
+        <div className={className} onClick={logout}>
+          Đăng xuất
+        </div>
+      )}
+    </>
+  );
 }

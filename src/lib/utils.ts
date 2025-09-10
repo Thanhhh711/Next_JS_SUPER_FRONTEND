@@ -1,14 +1,16 @@
-import envConfig, { defaultLocale } from "@/config";
+import envConfig from "@/config";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import authApiRequest from "@/apiRequest/auth";
-import { DishStatus, OrderStatus, TableStatus } from "@/constants/type";
+import { DishStatus, OrderStatus, Role, TableStatus } from "@/constants/type";
 import { clsx, type ClassValue } from "clsx";
 import jwt from "jsonwebtoken";
 import { UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 import { EntityError } from "./http";
+import { TokenPayload } from "@/types/jwt.types";
+import guestApiRequest from "@/apiRequest/guest";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -70,8 +72,8 @@ export const checkAndRefreshToken = async (param?: { onError: () => void; onSucc
   // chưa đăng nhập thì cũng không chạy
 
   if (!accessToken || !refreshToken) return;
-  const decodeAcessToken = jwt.decode(accessToken) as { exp: number; iat: number } | null;
-  const decodeRefreshToken = jwt.decode(refreshToken) as { exp: number; iat: number } | null;
+  const decodeAcessToken = decodeToken(accessToken);
+  const decodeRefreshToken = decodeToken(refreshToken);
 
   if (!decodeAcessToken || !decodeRefreshToken) return;
 
@@ -94,8 +96,8 @@ export const checkAndRefreshToken = async (param?: { onError: () => void; onSucc
 
   if (decodeAcessToken.exp - now < (decodeAcessToken.exp - decodeAcessToken.iat) / 3) {
     try {
-      const res = await authApiRequest.refreshToken();
-
+      const role = decodeRefreshToken.role;
+      const res = role === Role.Guest ? await guestApiRequest.refreshToken() : await authApiRequest.refreshToken();
       setAccessTokenToLocalStorage(res.payload.data.accessToken);
       setRefreshTokenToLocalStorage(res.payload.data.refreshToken);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,6 +152,14 @@ export const getVietnameseTableStatus = (status: (typeof TableStatus)[keyof type
   }
 };
 
+// export const getTableLink = ({ token, tableNumber }: { token: string; tableNumber: number }) => {
+//   return envConfig.NEXT_PUBLIC_URL + `/${defaultLocale}/tables/` + tableNumber + "?token=" + token;
+// };
+
 export const getTableLink = ({ token, tableNumber }: { token: string; tableNumber: number }) => {
-  return envConfig.NEXT_PUBLIC_URL + `/${defaultLocale}/tables/` + tableNumber + "?token=" + token;
+  return envConfig.NEXT_PUBLIC_URL + "/tables/" + tableNumber + "?token=" + token;
+};
+
+export const decodeToken = (token: string) => {
+  return jwt.decode(token) as TokenPayload;
 };

@@ -139,8 +139,7 @@ const request = async <Response>(
           } catch (error) {
             console.log(error);
           } finally {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
+            removeTokensFromLocalStorage();
             clientLogoutRequest = null;
             // Redirect trang Login có thể dẫn đến vòng lặp vô hạn
             //  nếu không được xử lý đunggs cách

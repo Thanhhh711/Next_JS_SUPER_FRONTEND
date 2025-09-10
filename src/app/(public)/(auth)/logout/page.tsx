@@ -13,7 +13,7 @@ function Logout() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const { setIsAuth } = useAppContext();
+  const { setRole } = useAppContext();
   const refreshTokenFormUrl = searchParams.get("refreshToken");
   const accessTokenFormUrl = searchParams.get("accessToken");
 
@@ -31,14 +31,14 @@ function Logout() {
         setTimeout(() => {
           ref.current = null;
         }, 1000);
-        setIsAuth(false);
+        setRole();
         router.push("/login");
       });
     } else {
       // veef trang chu
       router.push("/");
     }
-  }, [mutateAsync, router, refreshTokenFormUrl, accessTokenFormUrl, setIsAuth]);
+  }, [mutateAsync, router, refreshTokenFormUrl, accessTokenFormUrl, setRole]);
 
   return <div>Loading ....</div>;
 }
